@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">SmallWeather</string>
+    <string name="weather_unit">℃</string>
+</resources>
