@@ -20,7 +20,7 @@
         android:theme="@style/Theme.SmallWeather"
         tools:targetApi="31">
         <activity
-            android:name="com.kkw.smallweather.ui.main.activity.MainActivity"
+            android:name=".ui.main.activity.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
