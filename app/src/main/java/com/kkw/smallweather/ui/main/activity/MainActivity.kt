@@ -1,7 +1,10 @@
 package com.kkw.smallweather.ui.main.activity
 
+import android.graphics.Color
+import android.os.Build
 import android.util.Log
 import android.view.View
+import android.view.WindowManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.chad.library.adapter.base.QuickAdapterHelper
@@ -16,7 +19,6 @@ import com.kkw.smallweather.http.HttpRepository
 import com.kkw.smallweather.http.HttpRepository.await
 import com.kkw.smallweather.ui.main.adapter.DailyWeatherAdapter
 import com.kkw.smallweather.ui.main.adapter.HourlyWeatherAdapter
-import com.kkw.smallweather.view.HourlyItemDecoration
 
 /**
  * 天气主页
@@ -26,6 +28,7 @@ class MainActivity : BaseActivity() {
     lateinit var mDailyAdapter: DailyWeatherAdapter
     lateinit var mHourlyAdapter: HourlyWeatherAdapter
     lateinit var mHelper: QuickAdapterHelper
+    private var mNowCityName = "上海市"
 
     override fun getLayoutId(): View {
         TAG = "MainActivity"
@@ -34,6 +37,7 @@ class MainActivity : BaseActivity() {
     }
 
     override fun initView() {
+        showTitleCity(false)
         // 小时adapter
         mHourlyAdapter = HourlyWeatherAdapter()
         mBinding.hourlyRecyclerview.run {
@@ -46,6 +50,22 @@ class MainActivity : BaseActivity() {
         mBinding.dailyRecyclerview.run {
             adapter = mDailyAdapter
             layoutManager = LinearLayoutManager(this@MainActivity, RecyclerView.VERTICAL, false)
+        }
+
+        mBinding.mainScrollview.setOnScrollChangeListener { _, _, scrollY, _, _ ->
+            val nowWeatherViewHeight = mBinding.weatherNowView.height
+            val nowCityHeight = mBinding.nowCity.height
+            Log.d(
+                "kkkw",
+                "scrollY={${scrollY}/${nowWeatherViewHeight}}, scale={${nowWeatherViewHeight / 3}}"
+            )
+            showTitleCity(scrollY >= nowCityHeight * 2 / 3)
+            if (scrollY >= nowWeatherViewHeight / 3) {
+                mBinding.weatherNowView.visibility = View.INVISIBLE
+            } else {
+                mBinding.weatherNowView.visibility = View.VISIBLE
+            }
+
         }
     }
 
@@ -107,4 +127,29 @@ class MainActivity : BaseActivity() {
                 }
             })
     }
+
+    // 默认透明度
+    private var statusAlpha = 0
+
+    private fun setTopBackground() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            mBinding.weatherNowView.setBackgroundColor(Color.argb(statusAlpha, 237, 112, 0))
+            val window = this.window
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+            window.statusBarColor = Color.argb(statusAlpha, 237, 112, 0)
+        }
+    }
+
+    private fun showTitleCity(showTitle: Boolean) {
+        mBinding.toolbarTitle.text = mNowCityName
+        mBinding.nowCity.text = mNowCityName
+        if (showTitle) {
+            mBinding.toolbarTitle.visibility = View.VISIBLE
+            mBinding.nowCity.visibility = View.INVISIBLE
+        } else {
+            mBinding.toolbarTitle.visibility = View.INVISIBLE
+            mBinding.nowCity.visibility = View.VISIBLE
+        }
+    }
+
 }
