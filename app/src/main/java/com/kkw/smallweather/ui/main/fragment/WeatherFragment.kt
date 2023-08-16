@@ -4,11 +4,11 @@ import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.chad.library.adapter.base.QuickAdapterHelper
@@ -23,6 +23,11 @@ import com.kkw.smallweather.http.HttpRepository.await
 import com.kkw.smallweather.ui.main.activity.MainActivity
 import com.kkw.smallweather.ui.main.adapter.DailyWeatherAdapter
 import com.kkw.smallweather.ui.main.adapter.HourlyWeatherAdapter
+import com.kkw.smallweather.utils.observeState
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Observer
+import io.reactivex.rxjava3.disposables.Disposable
+import io.reactivex.rxjava3.schedulers.Schedulers
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -72,13 +77,15 @@ class WeatherFragment : Fragment() {
         mHourlyAdapter = HourlyWeatherAdapter()
         mBinding.hourlyRecyclerview.run {
             adapter = mHourlyAdapter
-            layoutManager = LinearLayoutManager(this@WeatherFragment.context, RecyclerView.HORIZONTAL, false)
+            layoutManager =
+                LinearLayoutManager(this@WeatherFragment.context, RecyclerView.HORIZONTAL, false)
         }
         // 每天adapter
         mDailyAdapter = DailyWeatherAdapter()
         mBinding.dailyRecyclerview.run {
             adapter = mDailyAdapter
-            layoutManager = LinearLayoutManager(this@WeatherFragment.context, RecyclerView.VERTICAL, false)
+            layoutManager =
+                LinearLayoutManager(this@WeatherFragment.context, RecyclerView.VERTICAL, false)
         }
 
         mBinding.mainScrollview.setOnScrollChangeListener { _, _, scrollY, _, _ ->
@@ -101,6 +108,10 @@ class WeatherFragment : Fragment() {
     }
 
     private fun initData() {
+//        CoroutineScope(Dispatchers.Main).launch {
+//            async(Dispatchers.IO) {  }
+//        }
+//        getNowWeather3()
         getNowWeather()
         getHourlyWeather()
         getDailyWeather()
@@ -125,6 +136,48 @@ class WeatherFragment : Fragment() {
             })
     }
 
+
+    private fun getNowWeather2() {
+        val TAG = "kkkw"
+        HttpRepository.weatherService.getWeatherNow2(mLocationId)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(object : Observer<BaseWeather<NowBean>> {
+                override fun onSubscribe(d: Disposable) {
+                    Log.d(TAG, "onSubscribe: $d")
+                }
+
+                override fun onError(e: Throwable) {
+                    Log.d(TAG, "onError: $e")
+                }
+
+                override fun onComplete() {
+                    Log.d(TAG, "onComplete: ")
+                }
+
+                override fun onNext(t: BaseWeather<NowBean>) {
+                    Log.d(TAG, "onNext: ${t}")
+                }
+
+            })
+    }
+
+    private fun getNowWeather3() {
+        val TAG = "kkkw"
+//        HttpRepository.weatherService.getWeatherNow3(mLocationId)
+//            .observe(viewLifecycleOwner) {
+//                Log.d(TAG, "getNowWeather3: $it")
+//            }
+        HttpRepository.weatherService.getWeatherNow3(mLocationId)
+            .observeState(this,
+                {
+                    Log.d(TAG, "getNowWeather3: $this")
+                },
+                {
+
+                })
+    }
+
     private fun getHourlyWeather() {
         HttpRepository.weatherService.getWeatherHourly(24, mLocationId)
             .await(object : RequestCallback<MutableList<HourlyBean>> {
@@ -146,6 +199,7 @@ class WeatherFragment : Fragment() {
             .await(object : RequestCallback<MutableList<DailyBean>> {
 
                 override fun onSuccess(data: BaseWeather<MutableList<DailyBean>>?) {
+                    Log.d("kkkw", "getDailyWeather: " + Thread.currentThread().name)
                     data?.bean?.let { dailyList ->
                         Log.d(TAG, "size: ${dailyList.size}")
                         mBinding.nowMaxMinTemp.maxTemp.text = "${dailyList[0].tempMax}℃"
@@ -201,7 +255,7 @@ class WeatherFragment : Fragment() {
         mOnTitleListener = null
     }
 
-    interface OnTitleListener{
+    interface OnTitleListener {
 
         fun changeTitleName(name: String?, showTitle: Boolean)
     }

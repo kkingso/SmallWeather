@@ -8,7 +8,9 @@ import com.google.gson.annotations.SerializedName
 data class BaseWeather<T>(
     // API状态码
     @SerializedName("code")
-    val code: Int?,
+    val errorCode: Int?,
+    // API错误信息
+    private val errorMessage: String?,
     // 最近更新时间
     @SerializedName("updateTime")
     val updateTime: String?,
@@ -16,6 +18,11 @@ data class BaseWeather<T>(
     @SerializedName("fxLink")
     val fxLink: String?,
     // 实时天气[现在，每日，每小时]
-    @SerializedName(value = "now", alternate = ["daily","hourly"])
+    @SerializedName(value = "now", alternate = ["daily", "hourly"])
     val bean: T?
-)
+) {
+
+    // api 请求是否成功
+    val isSuccess: Boolean
+        get() = errorCode == 200
+}
