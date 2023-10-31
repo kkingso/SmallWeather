@@ -23,6 +23,7 @@ import com.kkw.smallweather.http.HttpRepository.await
 import com.kkw.smallweather.ui.main.activity.MainActivity
 import com.kkw.smallweather.ui.main.adapter.DailyWeatherAdapter
 import com.kkw.smallweather.ui.main.adapter.HourlyWeatherAdapter
+import com.kkw.smallweather.utils.CommonUtil
 import com.kkw.smallweather.utils.observeState
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observer
@@ -88,6 +89,7 @@ class WeatherFragment : Fragment() {
                 LinearLayoutManager(this@WeatherFragment.context, RecyclerView.VERTICAL, false)
         }
 
+        // 标题栏动态计算位置
         mBinding.mainScrollview.setOnScrollChangeListener { _, _, scrollY, _, _ ->
             val nowWeatherViewHeight = mBinding.weatherNowView.height
             val nowCityHeight = mBinding.nowCity.height
@@ -104,6 +106,16 @@ class WeatherFragment : Fragment() {
 
         }
 
+        // 天气下拉刷新
+        mBinding.mainRefresh.apply {
+            setOnRefreshListener {
+                initData()
+                isRefreshing = false
+            }
+
+        }
+
+        // 初始化数据
         initData()
     }
 
@@ -126,9 +138,11 @@ class WeatherFragment : Fragment() {
                         mBinding.nowTemp.text = now.temp
                         mBinding.nowText.text = now.text
                     }
-                    data?.updateTime?.let {
-                        mBinding.weatherUpdatetime.text = "上次更新时间：${it.substring(11..15)}"
-                    }
+//                    data?.updateTime?.let {
+//                        mBinding.weatherUpdatetime.text = "上次更新时间：${it.substring(11..15)}"
+//                    }
+                    mBinding.weatherUpdatetime.text =
+                        "上次更新时间：${CommonUtil.convertData(System.currentTimeMillis())}"
                 }
 
                 override fun onFailure(t: Throwable) {

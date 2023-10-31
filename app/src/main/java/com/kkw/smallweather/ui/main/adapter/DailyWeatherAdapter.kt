@@ -1,13 +1,10 @@
 package com.kkw.smallweather.ui.main.adapter
 
 import android.content.Context
-import android.graphics.Typeface
-import android.graphics.drawable.Icon
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.chad.library.adapter.base.BaseQuickAdapter
-import com.kkw.smallweather.R
 import com.kkw.smallweather.bean.DailyBean
 import com.kkw.smallweather.databinding.ItemDailyWeatherBinding
 import com.kkw.smallweather.utils.ResourceUtil

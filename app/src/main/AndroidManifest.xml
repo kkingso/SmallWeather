@@ -28,6 +28,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".service.WeatherAidlService"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="com.kkw.smallweather.action" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+        </service>
     </application>
 
 </manifest>

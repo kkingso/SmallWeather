@@ -1,7 +1,7 @@
 package com.kkw.smallweather.ui.main.activity
 
-import android.util.Log
 import android.view.View
+import androidx.viewpager2.widget.ViewPager2
 import com.kkw.smallweather.BaseActivity
 import com.kkw.smallweather.databinding.ActivityMainBinding
 import com.kkw.smallweather.ui.main.adapter.CityViewPager2Adapter
@@ -21,7 +21,19 @@ class MainActivity : BaseActivity(), WeatherFragment.OnTitleListener {
     }
 
     override fun initView() {
-        mBinding.weatherVp2.adapter = CityViewPager2Adapter(this)
+        val vp2Adapter = CityViewPager2Adapter(this)
+        mBinding.weatherVp2.adapter = vp2Adapter
+        // 设置指示器个数
+        mBinding.vp2Indicator.setIndicatorItemCount(vp2Adapter.itemCount)
+        // 监听vp2界面变化
+        mBinding.weatherVp2.registerOnPageChangeCallback(object :
+            ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                // 显示在哪个页面就重绘对应的指示器
+                mBinding.vp2Indicator.setCurrentSelectedPosition(mBinding.weatherVp2.currentItem)
+                mBinding.vp2Indicator.postInvalidate()
+            }
+        })
     }
 
     override fun initData() {
